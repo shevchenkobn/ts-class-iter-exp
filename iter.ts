@@ -168,7 +168,7 @@ export function fromEntries<T = any>(collection: Iterable<readonly [PropertyKey,
  */
 export function firstOrDefault<T>(collection: Iterator<T> | Iterable<T>, predicate?: (value: T) => boolean): T | undefined;
 export function firstOrDefault<T>(collection: Iterator<T> | Iterable<T>, predicate: (value: T) => boolean, defaultValueGetter: () => T | never): T;
-export function firstOrDefault<T>(collection: Iterator<T> | Iterable<T>, predicate: (value: T) => boolean = Boolean, defaultValueGetter: () => T | undefined = () => undefined): T | undefined {
+export function firstOrDefault<T>(collection: Iterator<T> | Iterable<T>, predicate: (value: T) => boolean = () => true, defaultValueGetter: () => T | undefined = () => undefined): T | undefined {
   const iterator = toIterator(collection);
   let done: boolean;
   let value: T;
@@ -186,7 +186,6 @@ export function firstOrDefault<T>(collection: Iterator<T> | Iterable<T>, predica
 // console.log('firstOrDefault predicate', firstOrDefault(['', '', 'asdf', '', '', 'sadf', 'qwer'].map((v) => ({ v })), (value) => !!value.v));
 // console.log('firstOrDefault predicate default', firstOrDefault(['', '', 'asdf', '', '', 'sadf', 'qwer'].map((v) => ({ v })), (value) => !!value.v, () => ({ v: 'Not found' })).v);
 // console.log('firstOrDefault predicate default throw', firstOrDefault(['', '', 'asdf', '', '', 'sadf', 'qwer'].map((v) => ({ v })), (value) => !!value.v, () => { throw new TypeError('Not Found.'); }).v);
-// console.log('firstOrDefault not ok', firstOrDefault(['', '', '', '', '']));
 // console.log('firstOrDefault not predicate', firstOrDefault(['', '', '', '', ''].map((v) => ({ v })), (value) => !!value.v));
 // console.log('firstOrDefault not predicate default', firstOrDefault(['', '', '', ''].map((v) => ({ v })), (value) => !!value.v, () => ({ v: 'Not found' })).v);
 // tryCatch('firstOrDefault not predicate default throw', () => firstOrDefault(['', '', '', ''].map((v) => (
@@ -194,13 +193,13 @@ export function firstOrDefault<T>(collection: Iterator<T> | Iterable<T>, predica
 // )), (value) => !!value.v, () => {
 //   throw new TypeError('Not Found.');
 // }).v);
-// console.log('firstOrDefault empty', firstOrDefault(['', '', '', ''].map((v) => (
+// console.log('firstOrDefault empty', firstOrDefault([].map((v) => (
 //   { v }
 // )), (value) => !!value.v)?.v)
-// console.log('firstOrDefault empty default', firstOrDefault(['', '', '', ''].map((v) => (
+// console.log('firstOrDefault empty default', firstOrDefault([].map((v) => (
 //   { v }
 // )), (value) => !!value.v, () => ({ v: 'Not found' })).v)
-// tryCatch('firstOrDefault empty default throw', () => firstOrDefault(['', '', '', ''].map((v) => (
+// tryCatch('firstOrDefault empty default throw', () => firstOrDefault([].map((v) => (
 //   { v }
 // )), (value) => !!value.v, () => {
 //   throw new TypeError('Not Found.');
@@ -213,7 +212,7 @@ export function firstOrDefault<T>(collection: Iterator<T> | Iterable<T>, predica
  * @param {() => void} throwNotFound
  * @returns {T}
  */
-export function first<T>(collection: Iterator<T> | Iterable<T>, predicate: (value: T) => boolean = Boolean, throwNotFound = () => { throw new TypeError('Value is not found in the collection!'); }): T {
+export function first<T>(collection: Iterator<T> | Iterable<T>, predicate: (value: T) => boolean = () => true, throwNotFound = () => { throw new TypeError('Value is not found in the collection!'); }): T {
   return firstOrDefault(collection, predicate, throwNotFound);
 }
 
@@ -222,12 +221,11 @@ export function first<T>(collection: Iterator<T> | Iterable<T>, predicate: (valu
 // console.log('first predicate throw', first(['', '', 'asdf', '', '', 'sadf', 'qwer'].map((v) => ({ v })), (value) => !!value.v, () => {
 //   throw new TypeError('Not Found.');
 // }).v);
-// tryCatch('first not ok', () => first(['', '', '', '', '']));
 // tryCatch('first not predicate', () => first(['', '', '', '', ''].map((v) => ({ v })), (value) => !!value.v).v);
 // tryCatch('first not predicate throw', () => first(['', '', '', '', ''].map((v) => ({ v })), (value) => !!value.v, () => {
 //   throw new TypeError('Not Found.');
 // }).v);
-// tryCatch('first empty', () => first(['', '', '', '', ''].map((v) => ({ v })), (value) => !!value.v, () => {
+// tryCatch('first empty', () => first([].map((v) => ({ v })), (value) => !!value.v, () => {
 //   throw new TypeError('Not Found.');
 // }).v);
 
@@ -239,7 +237,7 @@ export function first<T>(collection: Iterator<T> | Iterable<T>, predicate: (valu
  */
 export function lastOrDefault<T>(collection: Iterator<T> | Iterable<T>, predicate?: (value: T) => boolean): T | undefined;
 export function lastOrDefault<T>(collection: Iterator<T> | Iterable<T>, predicate: (value: T) => boolean, defaultValueGetter: () => T | never): T;
-export function lastOrDefault<T>(collection: Iterator<T> | Iterable<T>, predicate: (value: T) => boolean = Boolean, defaultValueGetter: () => T | undefined = () => undefined): T | undefined {
+export function lastOrDefault<T>(collection: Iterator<T> | Iterable<T>, predicate: (value: T) => boolean = () => true, defaultValueGetter: () => T | undefined = () => undefined): T | undefined {
   const iterator = toIterator(collection);
   let done: boolean;
   let found = false;
@@ -248,10 +246,8 @@ export function lastOrDefault<T>(collection: Iterator<T> | Iterable<T>, predicat
     const result = iterator.next();
     done = !!result.done;
     if (!done) {
-      if (!found) {
-        found = predicate(result.value);
-      }
-      if (found) {
+      if (predicate(result.value)) {
+        found = true;
         value = result.value;
       }
     }
@@ -259,11 +255,10 @@ export function lastOrDefault<T>(collection: Iterator<T> | Iterable<T>, predicat
   return found ? value! : defaultValueGetter();
 }
 
-// console.log('lastOrDefault ok', lastOrDefault(['', '', 'asdf', '', '', 'sadf', 'qwer']));
-// console.log('lastOrDefault predicate', lastOrDefault(['', '', 'asdf', '', '', 'sadf', 'qwer'].map((v) => ({ v })), (value) => !!value.v));
-// console.log('lastOrDefault predicate default', lastOrDefault(['', '', 'asdf', '', '', 'sadf', 'qwer'].map((v) => ({ v })), (value) => !!value.v, () => ({ v: 'Not found' })).v);
-// console.log('lastOrDefault predicate default throw', lastOrDefault(['', '', 'asdf', '', '', 'sadf', 'qwer'].map((v) => ({ v })), (value) => !!value.v, () => { throw new TypeError('Not Found.'); }).v);
-// console.log('lastOrDefault not ok', lastOrDefault(['', '', '', '', '']));
+// console.log('lastOrDefault ok', lastOrDefault(['', '', 'asdf', '', '', 'sadf', 'qwer', '']));
+// console.log('lastOrDefault predicate', lastOrDefault(['', '', 'asdf', '', '', 'sadf', 'qwer', ''].map((v) => ({ v })), (value) => !!value.v));
+// console.log('lastOrDefault predicate default', lastOrDefault(['', '', 'asdf', '', '', 'sadf', 'qwer', ''].map((v) => ({ v })), (value) => !!value.v, () => ({ v: 'Not found' })).v);
+// console.log('lastOrDefault predicate default throw', lastOrDefault(['', '', 'asdf', '', '', 'sadf', 'qwer', ''].map((v) => ({ v })), (value) => !!value.v, () => { throw new TypeError('Not Found.'); }).v);
 // console.log('lastOrDefault not predicate', lastOrDefault(['', '', '', '', ''].map((v) => ({ v })), (value) => !!value.v));
 // console.log('lastOrDefault not predicate default', lastOrDefault(['', '', '', ''].map((v) => ({ v })), (value) => !!value.v, () => ({ v: 'Not found' })).v);
 // tryCatch('lastOrDefault not predicate default throw', () => lastOrDefault(['', '', '', ''].map((v) => (
@@ -271,13 +266,13 @@ export function lastOrDefault<T>(collection: Iterator<T> | Iterable<T>, predicat
 // )), (value) => !!value.v, () => {
 //   throw new TypeError('Not Found.');
 // }).v);
-// console.log('lastOrDefault empty', lastOrDefault(['', '', '', ''].map((v) => (
+// console.log('lastOrDefault empty', lastOrDefault([].map((v) => (
 //   { v }
 // )), (value) => !!value.v)?.v)
-// console.log('lastOrDefault empty default', lastOrDefault(['', '', '', ''].map((v) => (
+// console.log('lastOrDefault empty default', lastOrDefault([].map((v) => (
 //   { v }
 // )), (value) => !!value.v, () => ({ v: 'Not found' })).v)
-// tryCatch('lastOrDefault empty default throw', () => lastOrDefault(['', '', '', ''].map((v) => (
+// tryCatch('lastOrDefault empty default throw', () => lastOrDefault([].map((v) => (
 //   { v }
 // )), (value) => !!value.v, () => {
 //   throw new TypeError('Not Found.');
@@ -290,21 +285,20 @@ export function lastOrDefault<T>(collection: Iterator<T> | Iterable<T>, predicat
  * @param {() => void} throwNotFound
  * @returns {T}
  */
-export function last<T>(collection: Iterator<T> | Iterable<T>, predicate: (value: T) => boolean = Boolean, throwNotFound = () => { throw new TypeError('Value is not found in the collection!'); }): T {
+export function last<T>(collection: Iterator<T> | Iterable<T>, predicate: (value: T) => boolean = () => true, throwNotFound = () => { throw new TypeError('Value is not found in the collection!'); }): T {
   return lastOrDefault(collection, predicate, throwNotFound);
 }
 
-// console.log('last ok', last(['', '', 'asdf', '', '', 'sadf', 'qwer']));
-// console.log('last predicate', last(['', '', 'asdf', '', '', 'sadf', 'qwer'].map((v) => ({ v })), (value) => !!value.v).v);
-// console.log('last predicate throw', last(['', '', 'asdf', '', '', 'sadf', 'qwer'].map((v) => ({ v })), (value) => !!value.v, () => {
+// console.log('last ok', last(['', '', 'asdf', '', '', 'sadf', 'qwer', '']));
+// console.log('last predicate', last(['', '', 'asdf', '', '', 'sadf', 'qwer', ''].map((v) => ({ v })), (value) => !!value.v).v);
+// console.log('last predicate throw', last(['', '', 'asdf', '', '', 'sadf', 'qwer', ''].map((v) => ({ v })), (value) => !!value.v, () => {
 //   throw new TypeError('Not Found.');
 // }).v);
-// tryCatch('last not ok', () => last(['', '', '', '', '']));
 // tryCatch('last not predicate', () => last(['', '', '', '', ''].map((v) => ({ v })), (value) => !!value.v).v);
 // tryCatch('last not predicate throw', () => last(['', '', '', '', ''].map((v) => ({ v })), (value) => !!value.v, () => {
 //   throw new TypeError('Not Found.');
 // }).v);
-// tryCatch('last empty', () => last(['', '', '', '', ''].map((v) => ({ v })), (value) => !!value.v, () => {
+// tryCatch('last empty', () => last([].map((v) => ({ v })), (value) => !!value.v, () => {
 //   throw new TypeError('Not Found.');
 // }).v);
 
@@ -511,9 +505,9 @@ export function* chunkify<T>(collection: Iterator<T> | Iterable<T>, chunkSize: n
  * Map operator.
  * @returns {(value: T) => [number, T]}
  */
-export function enumerate<T>() {
+export function enumerate() {
   let i = 0;
-  return function enumerateMap(value: T) {
+  return function enumerateMap<T>(value: T): [number, T] {
     const pair: [number, T] = [i, value];
     i += 1;
     return pair;
