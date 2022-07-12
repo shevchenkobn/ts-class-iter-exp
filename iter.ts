@@ -22,6 +22,7 @@
 import { iterate } from 'iterare';
 import { toIterator } from 'iterare/lib/utils';
 import { IteratorWithOperators } from 'iterare/lib/iterate';
+import { IterableOrIterator } from './lib/types';
 
 function tryCatch(msg: string, func: () => any) {
   try {
@@ -162,13 +163,13 @@ export function fromEntries<T = any>(collection: Iterable<readonly [PropertyKey,
 
 /**
  * Often used accumulator, requires certain implementation. Partially can be replaced with `iterate(collection).takeWhile(predicate).take(1).next()`.
- * @param {Iterator<T> | Iterable<T>} collection
+ * @param {IterableOrIterator<T>} collection
  * @param {(value: T) => boolean} predicate
  * @returns {T | undefined}
  */
-export function firstOrDefault<T>(collection: Iterator<T> | Iterable<T>, predicate?: (value: T) => boolean): T | undefined;
-export function firstOrDefault<T>(collection: Iterator<T> | Iterable<T>, predicate: (value: T) => boolean, defaultValueGetter: () => T | never): T;
-export function firstOrDefault<T>(collection: Iterator<T> | Iterable<T>, predicate: (value: T) => boolean = () => true, defaultValueGetter: () => T | undefined = () => undefined): T | undefined {
+export function firstOrDefault<T>(collection: IterableOrIterator<T>, predicate?: (value: T) => boolean): T | undefined;
+export function firstOrDefault<T>(collection: IterableOrIterator<T>, predicate: (value: T) => boolean, defaultValueGetter: () => T | never): T;
+export function firstOrDefault<T>(collection: IterableOrIterator<T>, predicate: (value: T) => boolean = () => true, defaultValueGetter: () => T | undefined = () => undefined): T | undefined {
   const iterator = toIterator(collection);
   let done: boolean;
   let value: T;
@@ -207,12 +208,12 @@ export function firstOrDefault<T>(collection: Iterator<T> | Iterable<T>, predica
 
 /**
  * Often used accumulator, requires certain implementation. Can be replaced, but not in one line (due to throw command).
- * @param {Iterator<T> | Iterable<T>} collection
+ * @param {IterableOrIterator<T>} collection
  * @param {(value: T) => boolean} predicate
  * @param {() => void} throwNotFound
  * @returns {T}
  */
-export function first<T>(collection: Iterator<T> | Iterable<T>, predicate: (value: T) => boolean = () => true, throwNotFound = () => { throw new TypeError('Value is not found in the collection!'); }): T {
+export function first<T>(collection: IterableOrIterator<T>, predicate: (value: T) => boolean = () => true, throwNotFound = () => { throw new TypeError('Value is not found in the collection!'); }): T {
   return firstOrDefault(collection, predicate, throwNotFound);
 }
 
@@ -231,13 +232,13 @@ export function first<T>(collection: Iterator<T> | Iterable<T>, predicate: (valu
 
 /**
  * Often used accumulator, requires certain implementation. Cannot be replaced easily with existing operators.
- * @param {Iterator<T> | Iterable<T>} collection
+ * @param {IterableOrIterator<T>} collection
  * @param {(value: T) => boolean} predicate
  * @returns {T | undefined}
  */
-export function lastOrDefault<T>(collection: Iterator<T> | Iterable<T>, predicate?: (value: T) => boolean): T | undefined;
-export function lastOrDefault<T>(collection: Iterator<T> | Iterable<T>, predicate: (value: T) => boolean, defaultValueGetter: () => T | never): T;
-export function lastOrDefault<T>(collection: Iterator<T> | Iterable<T>, predicate: (value: T) => boolean = () => true, defaultValueGetter: () => T | undefined = () => undefined): T | undefined {
+export function lastOrDefault<T>(collection: IterableOrIterator<T>, predicate?: (value: T) => boolean): T | undefined;
+export function lastOrDefault<T>(collection: IterableOrIterator<T>, predicate: (value: T) => boolean, defaultValueGetter: () => T | never): T;
+export function lastOrDefault<T>(collection: IterableOrIterator<T>, predicate: (value: T) => boolean = () => true, defaultValueGetter: () => T | undefined = () => undefined): T | undefined {
   const iterator = toIterator(collection);
   let done: boolean;
   let found = false;
@@ -280,12 +281,12 @@ export function lastOrDefault<T>(collection: Iterator<T> | Iterable<T>, predicat
 
 /**
  * Often used accumulator, requires certain implementation. Cannot be replaced easily with existing operators.
- * @param {Iterator<T> | Iterable<T>} collection
+ * @param {IterableOrIterator<T>} collection
  * @param {(value: T) => boolean} predicate
  * @param {() => void} throwNotFound
  * @returns {T}
  */
-export function last<T>(collection: Iterator<T> | Iterable<T>, predicate: (value: T) => boolean = () => true, throwNotFound = () => { throw new TypeError('Value is not found in the collection!'); }): T {
+export function last<T>(collection: IterableOrIterator<T>, predicate: (value: T) => boolean = () => true, throwNotFound = () => { throw new TypeError('Value is not found in the collection!'); }): T {
   return lastOrDefault(collection, predicate, throwNotFound);
 }
 
@@ -304,11 +305,11 @@ export function last<T>(collection: Iterator<T> | Iterable<T>, predicate: (value
 
 // /**
 //  * Often used accumulator. Can be easily replaced by inline reduce operator. Looks weird if replaced with factory reducer operator function (see below).
-//  * @param {Iterator<T> | Iterable<T>} collection
+//  * @param {IterableOrIterator<T>} collection
 //  * @param {(value: T) => number} selector
 //  * @returns {number}
 //  */
-// export function sum<T>(collection: Iterator<T> | Iterable<T>, selector: (value: T) => number): number {
+// export function sum<T>(collection: IterableOrIterator<T>, selector: (value: T) => number): number {
 //   const iterator = toIterator(collection);
 //   let done: boolean;
 //   let sum = 0;
@@ -327,10 +328,10 @@ export function last<T>(collection: Iterator<T> | Iterable<T>, predicate: (value
 //
 // /**
 //  * Often used accumulator. Can be easily replaced by inline reduce operator. Looks weird if replaced with factory reducer operator function (see below).
-//  * @param {Iterator<unknown> | Iterable<unknown>} collection
+//  * @param {IterableOrIterator<unknown>} collection
 //  * @returns {number}
 //  */
-// export function count(collection: Iterator<unknown> | Iterable<unknown>): number {
+// export function count(collection: IterableOrIterator<unknown>): number {
 //   return sum(collection, () => 1);
 // }
 //
@@ -364,11 +365,11 @@ export function count<T>(): [(sum: number, value: T) => number, number] {
 
 /**
  * Missing operator. Cannot be replaced easily with existing operators.
- * @param {Iterator<T> | Iterable<T>} collection
+ * @param {IterableOrIterator<T>} collection
  * @param {() => T} defaultValueGetter
  * @returns {Generator<T, any, undefined>}
  */
-export function* defaultIfEmpty<T>(collection: Iterator<T> | Iterable<T>, defaultValueGetter: () => T | never): Generator<T, any, undefined> {
+export function* defaultIfEmpty<T>(collection: IterableOrIterator<T>, defaultValueGetter: () => T | never): Generator<T, any, undefined> {
   const iterator = toIterator(collection);
   let done: boolean;
   let isEmpty = true;
@@ -392,11 +393,11 @@ export function* defaultIfEmpty<T>(collection: Iterator<T> | Iterable<T>, defaul
 
 /**
  * Missing operator.
- * @param {Iterator<T> | Iterable<T>} collection
+ * @param {IterableOrIterator<T>} collection
  * @param {(value: T) => boolean} predicate
  * @returns {Generator<T, any, undefined>}
  */
-export function* takeWhile<T>(collection: Iterator<T> | Iterable<T>, predicate: (value: T) => boolean): Generator<T, any, undefined> {
+export function* takeWhile<T>(collection: IterableOrIterator<T>, predicate: (value: T) => boolean): Generator<T, any, undefined> {
   const iterator = toIterator(collection);
   let done: boolean;
   do {
@@ -415,10 +416,10 @@ export function* takeWhile<T>(collection: Iterator<T> | Iterable<T>, predicate: 
 
 /**
  * Missing operator. Can be replaced with obscure map & drop operators (map all to pairs, drop first).
- * @param {Iterator<T> | Iterable<T>} collection
+ * @param {IterableOrIterator<T>} collection
  * @returns {Generator<[T, T], any, undefined>}
  */
-export function* pairwise<T>(collection: Iterator<T> | Iterable<T>): Generator<[T, T], any, undefined> {
+export function* pairwise<T>(collection: IterableOrIterator<T>): Generator<[T, T], any, undefined> {
   const iterator = toIterator(collection);
   let previous!: T;
   let previousSet = false;
@@ -445,11 +446,11 @@ export function* pairwise<T>(collection: Iterator<T> | Iterable<T>): Generator<[
 
 /**
  * Missing operator.
- * @param {Iterator<T> | Iterable<T>} collection
+ * @param {IterableOrIterator<T>} collection
  * @param {number} chunkSize
  * @returns {Generator<T[], any, undefined>}
  */
-export function* chunkify<T>(collection: Iterator<T> | Iterable<T>, chunkSize: number): Generator<T[], any, undefined> {
+export function* chunkify<T>(collection: IterableOrIterator<T>, chunkSize: number): Generator<T[], any, undefined> {
   if (chunkSize <= 0) {
     throw new TypeError(`Expected positive finite chunk size, got ${chunkSize}.`)
   }
@@ -481,10 +482,10 @@ export function* chunkify<T>(collection: Iterator<T> | Iterable<T>, chunkSize: n
 
 // /**
 //  * Missing operator. Can be easily replaced with map operator + closure (see below).
-//  * @param {Iterator<T> | Iterable<T>} collection
+//  * @param {IterableOrIterator<T>} collection
 //  * @returns {Generator<[number, T], any, undefined>}
 //  */
-// export function* enumerate<T>(collection: Iterator<T> | Iterable<T>): Generator<[number, T], any, undefined> {
+// export function* enumerate<T>(collection: IterableOrIterator<T>): Generator<[number, T], any, undefined> {
 //   const iterator = toIterator(collection);
 //   let done: boolean;
 //   let i = 0;
