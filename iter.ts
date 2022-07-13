@@ -24,7 +24,7 @@ import { toIterator } from 'iterare/lib/utils';
 import { IteratorWithOperators } from 'iterare/lib/iterate';
 import { IterableOrIterator } from './lib/types';
 
-function tryCatch(msg: string, func: () => any) {
+export function tryCatch(msg: string, func: () => any) {
   try {
     console.log(msg, func());
   } catch (err) {

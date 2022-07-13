@@ -2,7 +2,7 @@ export class IteratorWithOperators<T> implements IterableIterator<T> {
   /**
    * @param source Iterator to wrap
    */
-  constructor(private source: Iterator<T>) {
+  constructor(protected source: Iterator<T>) {
   }
 
   /**

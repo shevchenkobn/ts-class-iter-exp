@@ -8,5 +8,5 @@ declare module '../../iterator-with-operators' {
 }
 
 IteratorWithOperators.prototype.dropWhile = function dropWhile<T>(this: IteratorWithOperators<T>, predicate: (value: T) => boolean) {
-  return new IteratorWithOperators<T>(iterate(this).filter(operator(predicate)));
+  return new IteratorWithOperators<T>(iterate(this.source).filter(operator(predicate)));
 }

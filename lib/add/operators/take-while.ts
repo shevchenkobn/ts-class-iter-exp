@@ -7,5 +7,5 @@ declare module '../../iterator-with-operators' {
 }
 
 IteratorWithOperators.prototype.takeWhile = function takeWhile<T>(this: IteratorWithOperators<T>, predicate: (value: T) => boolean) {
-  return new IteratorWithOperators<T>(operator(this, predicate));
+  return new IteratorWithOperators<T>(operator(this.source, predicate));
 }
