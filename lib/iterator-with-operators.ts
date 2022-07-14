@@ -1,15 +1,29 @@
 export class IteratorWithOperators<T> implements IterableIterator<T> {
+  protected _done = false;
   /**
    * @param source Iterator to wrap
    */
   constructor(protected source: Iterator<T>) {
   }
 
+  get isDone() {
+    return this._done;
+  }
+
   /**
    * Returns a `{ value, done }` object that adheres to the Iterator protocol
    */
   next(): IteratorResult<T> {
-    return this.source.next()
+    try {
+      const result = this.source.next()
+      if (result.done) {
+        this._done = result.done;
+      }
+      return result;
+    } catch (err) {
+      this._done = true;
+      throw err;
+    }
   }
 
   /**

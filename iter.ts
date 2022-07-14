@@ -20,9 +20,9 @@
  * For readability, implementation for all missing operators and accumulators can be refactored using `iterate(collection).forEach()`.
  */
 import { iterate } from 'iterare';
-import { toIterator } from 'iterare/lib/utils';
 import { IteratorWithOperators } from 'iterare/lib/iterate';
-import { IterableOrIterator } from './lib/types';
+import { isIterable, isIterator, toIterator } from 'iterare/lib/utils';
+import { DeepIterableOrIterator, IterableOrIterator } from './lib/types';
 
 export function tryCatch(msg: string, func: () => any) {
   try {
@@ -479,6 +479,26 @@ export function* chunkify<T>(collection: IterableOrIterator<T>, chunkSize: numbe
 // console.log('chunk empty', Array.from(chunkify([], 3)));
 // tryCatch('chunk negative', () => Array.from(chunkify([1,2,3,4,5,1,2,3,4,5,1,2,3,4,5], -3)));
 // tryCatch('chunk zero', () => Array.from(chunkify([1,2,3,4,5,1,2,3,4,5,1,2,3,4,5], 0)));
+
+export function* flattenDeep<T>(collection: DeepIterableOrIterator<T>): Generator<T, void, undefined> {
+  const iterator = toIterator(collection);
+  while (true) {
+    const { value, done } = iterator.next();
+    if (done) {
+      break;
+    }
+    if (isIterable(value) || isIterator(value)) {
+      for (const result of flattenDeep(value)) {
+        yield result;
+      }
+    } else {
+      yield value;
+    }
+  }
+}
+
+console.log('flattenDeep ok', Array.from(flattenDeep<string | number>([[2, 3, 5, 6], 2, [2, 3, 5, 3], 2, 3, ['asdf', 1, 3, [[2, 3, 4, 3], 3, 5, 5], 4, ['2', 2, 3, 5]]])));
+console.log('flattenDeep empty', Array.from(flattenDeep<number>([])));
 
 // /**
 //  * Missing operator. Can be easily replaced with map operator + closure (see below).

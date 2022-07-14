@@ -4,7 +4,7 @@ import { filter as filterOperator } from './lib/operators/filter';
 import { pipe } from './lib/operators/pipe';
 import { takeWhile as takeWhileOperator } from './lib/operators/take-while';
 import { distinctUntilChanged, enumerate, firstOrDefault as firstOrDefaultOperator, range, scan } from './iter';
-import { pipify } from './lib/pipify';
+import { PipableOperator, pipify } from './lib/pipify';
 
 const takeWhile = pipify(takeWhileOperator);
 const map = pipify(mapOperator);
@@ -23,6 +23,7 @@ forEach(pipe(
 
 pipify(range); // <-- shouldn't compile.
 
+const f: PipableOperator<number, [() => false], string> = firstOrDefaultOperator; // <-- shouldn't compile.
 const firstOrDefault = pipify(firstOrDefaultOperator); // <-- shouldn't compile, but it compiles and breaks all pipelines where used, see below.
 forEach(pipe(
   [1,2,3,4,5],
