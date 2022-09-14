@@ -51,10 +51,20 @@ export function of<T>(...args: T[]): IteratorWithOperators<T> {
 export function range(): Generator<number, any, undefined>;
 export function range(end: number): Generator<number, any, undefined>;
 export function range(start: number, end: number, step?: number): Generator<number, any, undefined>;
-export function* range(...args: number[]): Generator<number, any, undefined> {
-  const start = args.length > 1 ? args[0] as number : 0;
-  const step = args.length > 2 ? args[2] as number : 1;
-  const end = (args.length === 0 ? Number.POSITIVE_INFINITY : args.length === 1 ? args[0] : args[1]) as number;
+export function* range(
+  startOrEndArg?: number,
+  endArg?: number,
+  stepArg?: number
+): Generator<number, any, undefined> {
+  const start = startOrEndArg ?? 0;
+  const step = stepArg ?? 1;
+  const end = (
+    startOrEndArg === undefined
+      ? Number.POSITIVE_INFINITY
+      : endArg === undefined
+      ? startOrEndArg
+      : endArg
+  ) as number;
 
   if (step >= 0) {
     for (let i = start; i < end; i += step) {
